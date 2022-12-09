@@ -46,7 +46,6 @@ export const App = () => {
 
   useLayoutEffect(() => {
     if (page !== 1 && !modalShown) {
-      console.log(modalShown);
       const { height: cardHeight } = document
         .getElementById(idToScrollTo)
         .getBoundingClientRect();
