@@ -21,18 +21,32 @@ export const App = () => {
   const [modalShown, setModalShown] = useState(false);
 
   useEffect(() => {
+    const getPictures = async () => {
+      setIsLoading(true);
+
+      const arrayOfPictures = await fetchPictures(query, page);
+      const filteredArray = filterPicturesArray(arrayOfPictures);
+      if (filteredArray.length === 0) {
+        setIsLoading(false);
+        return notifyAboutWrongQuery();
+      }
+
+      setIdToScrollTo(filteredArray[0].id);
+      setTotalNumberOfPages(amountOfPages);
+      setModalShown(false);
+      setPictures(prevPictures => [...prevPictures, ...filteredArray]);
+
+      setIsLoading(false);
+    };
+
     if (query) {
       getPictures();
     }
-
-    /* if (page === totalNumberOfPages) {
-      notifyAboutTheEndOfCollection();
-      setTotalNumberOfPages(0);
-    } */
   }, [query, page]);
 
   useLayoutEffect(() => {
     if (page !== 1 && !modalShown) {
+      console.log(modalShown);
       const { height: cardHeight } = document
         .getElementById(idToScrollTo)
         .getBoundingClientRect();
@@ -47,39 +61,6 @@ export const App = () => {
       setTotalNumberOfPages(0);
     }
   }, [page, modalShown, idToScrollTo, totalNumberOfPages]);
-
-  /*   componentDidUpdate(_, prevState) {
-    const { searchDone, page, modalShown, totalNumberOfPages } = this.state;
-
-    if (searchDone !== prevState.searchDone || page !== prevState.page) {
-      this.getPictures();
-    }
-
-    if (page !== 1 && !modalShown) {
-      this.scrollToFirstPicture();
-    }
-    if (page === totalNumberOfPages) {
-      this.notifyAboutTheEndOfCollection();
-      this.setState({ totalNumberOfPages: 0 });
-    }
-  }
-*/
-  const getPictures = async () => {
-    setIsLoading(true);
-
-    const arrayOfPictures = await fetchPictures(query, page);
-    const filteredArray = filterPicturesArray(arrayOfPictures);
-    if (filteredArray.length === 0) {
-      setIsLoading(false);
-      return notifyAboutWrongQuery();
-    }
-
-    setIdToScrollTo(filteredArray[0].id);
-    setTotalNumberOfPages(amountOfPages);
-    setPictures(prevPictures => [...prevPictures, ...filteredArray]);
-
-    setIsLoading(false);
-  };
 
   const showPictures = query => {
     setPictures([]);
@@ -98,7 +79,6 @@ export const App = () => {
 
   const closeModal = () => {
     setCurrentImage(null);
-    setModalShown(false);
   };
 
   const notifyAboutWrongQuery = () => {
