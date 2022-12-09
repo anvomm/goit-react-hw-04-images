@@ -1,55 +1,47 @@
-import { Component } from 'react';
 import { createPortal } from 'react-dom';
 import s from './Modal.module.css';
 import { IconContext } from 'react-icons';
 import { CgClose } from 'react-icons/cg';
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 
 const modalRoot = document.querySelector('#modal-root');
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.closeByEsc);
-  }
+export const Modal = ({ closeModal, largeImageURL, query }) => {
+  useEffect(() => {
+    const closeByEsc = e => {
+      if (e.code === 'Escape') {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', closeByEsc);
+    return () => {
+      window.removeEventListener('keydown', closeByEsc);
+    };
+  }, [closeModal]);
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.closeByEsc);
-  }
-
-  closeByEsc = e => {
-    if (e.code === 'Escape') {
-      this.props.closeModal();
-    }
-  };
-
-  closeOnOverlayCLick = e => {
+  const closeOnOverlayCLick = e => {
     if (e.target === e.currentTarget) {
-      this.props.closeModal();
+      closeModal();
     }
   };
-  render() {
-    return createPortal(
-      <div className={s.Overlay} onClick={this.closeOnOverlayCLick}>
-        <div className={s.Modal}>
-          <button
-            className={s.CloseBtn}
-            type="button"
-            onClick={() => this.props.closeModal()}
-          >
-            <IconContext.Provider value={{ size: 30, color: 'white' }}>
-              <CgClose />
-            </IconContext.Provider>
-          </button>
-          <img
-            className={s.Modal__image}
-            src={this.props.largeImageURL}
-            alt={this.props.query}
-          />
-        </div>
-      </div>,
-      modalRoot
-    );
-  }
-}
+  return createPortal(
+    <div className={s.Overlay} onClick={closeOnOverlayCLick}>
+      <div className={s.Modal}>
+        <button
+          className={s.CloseBtn}
+          type="button"
+          onClick={() => closeModal()}
+        >
+          <IconContext.Provider value={{ size: 30, color: 'white' }}>
+            <CgClose />
+          </IconContext.Provider>
+        </button>
+        <img className={s.Modal__image} src={largeImageURL} alt={query} />
+      </div>
+    </div>,
+    modalRoot
+  );
+};
 
 Modal.propTypes = {
   query: PropTypes.string.isRequired,
